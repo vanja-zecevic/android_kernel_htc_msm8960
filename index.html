@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>android kernel htc msm8960 by vanja-zecevic</title>
+  </head>
+
+<body>
+
+<header>
+  <div class="container">
+    <h1>android kernel htc msm8960</h1>
+    <a href="https://github.com/vanja-zecevic/android_kernel_htc_msm8960">View on GitHub</a><br>
+  </div>
+</header>
+
+<div class="container">
+<section id="main_content">
+
+<h3>Introduction</h3>
+
+<p>This is a replacement kernel for CyanogenMod 10 evita builds. The kernel is
+designed to be as close as possible to the stock CyanogenMod kernel with a few
+improvements. There are two branches, the 'oc' branch features modified
+frequency and voltage values, giving you the following overclock
+<pre><code>CPU: 1782 MHz 1.25 V
+L2:  1350 MHz 1.15 V
+BUS:  532 MHz</code></pre>
+In order to make the overclock stick under moderate to high load, you will need
+to modify
+<pre><code>/etc/thermald.conf</code></pre>
+and change 1512000 to 1782000.</p>
+
+<p>The 'oc-linaro' branch is compiled with the
+Linaro toolchain based on gcc 4.7 rather than the default Android toolchain. The
+Linaro version may provide performance improvements in some situations.
+This branch also has a few patches applied to make it compatible with gcc 4.7.</p>
+
+<h3>Downloading and installing</h3>
+
+<p>Download one of these boot images<br><br>
+<a href="files/boot_vz-oc.20121228.img">boot_vz-oc.20121228.img</a><br>
+MD5=31be07cb2b9efac3ff624bf005bcd0fe<br><br>
+<a href="files/boot_vz-oc-linaro.20121228.img">boot_vz-oc-linaro.20121228.img</a><br>
+MD5=a1c128e266dbd736a03f58b9e5dbf95d<br></p>
+
+<p>In order to flash the kernel to your device, you will need to reboot into
+bootloader and run
+<pre><code>fastboot flash boot boot_vz-oc.img</code></pre>
+Otherwise you can just test the kernel with
+<pre><code>fastboot boot boot_vz-oc.img</code></pre></p>
+
+<p>In order to make the overclock stick under moderate to high load, you will
+need to modify your thermal settings
+<pre><code>adb shell
+su
+mount -o rw,remount /system
+vim /etc/thermald.conf
+# Change 1512000 to 1782000
+reboot</code></pre></p>
+
+
+<h3>Future development</h3>
+
+<p>I hope to introduce GPU overclocking soon and there will be updated builds as
+soon as changes come into the main CyanogenMod repo. I will put up builds for
+CM10.1 pretty soon. I may also add a few of the popular governors and IO
+schedulers if people want that.</p>
+
+<h3>Building the kernel</h3>
+
+<p>For those who would like to build the kernel themselves, here are some basic
+instructions. First you will need to acquire some tools. You can get the default
+toolchain from the CM10 source code at,
+<pre><code>system/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/</code></pre>
+Otherwise, if you want to use the Linaro toolchain, you can get it at<br>
+<a href="http://www.linaro.org/downloads/">Linaro toolchain</a><br>
+You will also need a working boot image to get the ramdisk from. You can build
+mkbootimg using these instructions<br>
+<a href="https://gist.github.com/1087757">building mkbootimg</a><br>
+Finally, you can get split_bootimg_pl from William Encks site<br>
+<a href="http://www.enck.org/tools.html">download mkbootimg</a><br>
+Clone the repo and change to your desired branch
+<pre><code>git clone https://github.com/vanja-zecevic/android_kernel_htc_msm8960.git
+git checkout jellybean-oc</code></pre>
+Now export an environmental variable pointing to your desired toolchain
+<pre><code>export CCOMPILER=$PATH_TO_TOOLCHAIN/bin/arm-eabi-</code></pre>
+Copy the config file, run menuconfig once and start the build replacing -j12
+with your desired number of threads
+<pre><code>cp ./config-oc ./.config
+make ARCH=arm SUBARCH=arm CROSS_COMPILE=$CCOMPILER menuconfig
+make ARCH=arm SUBARCH=arm CROSS_COMPILE=$CCOMPILER -j12</code></pre>
+Extract a ramdisk from a working boot image and repack with your freshly built
+kernel
+<pre><code>./split_bootimg_pl ./boot.img
+./mkbootimg --base 0x80400000 --ramdiskaddr 0x81800000 \
+  --cmdline 'console=ttyHSL0,115200,n8' \
+  --kernel arch/arm/boot/zImage --ramdisk boot.img-ramdisk.gz \
+  -o boot_vz-oc.img
+</code></pre>
+You are ready to flash your new kernel!</p>
+
+<h3>Contact</h3>
+
+I hope you enjoy using this kernel, if you have any problems please contact me
+at vanja_z*yahoo.com or make a post in this thread where I have mirrored all
+of this content.<br><br>
+<a href="https://github.com/vanja-zecevic/android_kernel_htc_msm8960">GitHub
+repo</a><br>
+Cheers,<br>
+Vanja
+
+</section>
+</div>
+</body>
+</html>
